@@ -51,6 +51,21 @@ void ATankPawn::RotateRight(float AxisValue)
 	TargetRightAxisValue = AxisValue;
 }
 
+void ATankPawn::Movement(float DeltaTime)
+{
+	FVector currentLocation = GetActorLocation();
+	FVector forwardVector = GetActorForwardVector();
+	FVector movePosition = currentLocation + forwardVector * MoveSpeed * TargetForwardAxisValue * DeltaTime;
+	SetActorLocation(movePosition, true);
+
+	CurrentRightAxisValue = FMath::Lerp(CurrentRightAxisValue, TargetRightAxisValue, InterpolationKey);
+	float yawRotation = RotationSpeed * CurrentRightAxisValue * DeltaTime;
+	FRotator currentRotation = GetActorRotation();
+	yawRotation = currentRotation.Yaw + yawRotation;
+	FRotator newRotation = FRotator(0, yawRotation, 0);
+	SetActorRotation(newRotation);
+}
+
 // Called when the game starts or when spawned
 void ATankPawn::BeginPlay()
 {
@@ -63,20 +78,7 @@ void ATankPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// Tank movement
-	FVector currentLocation = GetActorLocation();
-	FVector forwardVector = GetActorForwardVector();
-	FVector movePosition = currentLocation + forwardVector * MoveSpeed * TargetForwardAxisValue * DeltaTime;
-	SetActorLocation(movePosition, true);
-
-	// Tank rotation
-	CurrentRightAxisValue = FMath::Lerp(CurrentRightAxisValue, TargetRightAxisValue, InterpolationKey);
-	//UE_LOG(TankLog, Warning, TEXT("CurrentRightAxisValue = %f TargetRightAxisValue = %f"), CurrentRightAxisValue, TargetRightAxisValue);
-	float yawRotation = RotationSpeed * CurrentRightAxisValue * DeltaTime;
-	FRotator currentRotation = GetActorRotation();
-	yawRotation = currentRotation.Yaw + yawRotation;
-	FRotator newRotation = FRotator(0, yawRotation, 0);
-	SetActorRotation(newRotation);
+	ATankPawn::Movement(DeltaTime);
 
 }
 

@@ -54,6 +54,8 @@ public:
 		void MoveForward(float AxisValue);
 	UFUNCTION()
 		void RotateRight(float AxisValue);
+	UFUNCTION()
+		void Movement(float DeltaTime);
 
 protected:
 	// Called when the game starts or when spawned
