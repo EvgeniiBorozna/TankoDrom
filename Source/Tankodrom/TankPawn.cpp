@@ -1,12 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "TankPawn.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "TankPlayerController.h"
-//#include "Kismet/KismetMathLibrary.h"
-#include "Math/UnrealMathUtility.h"
+#include "Kismet/KismetMathLibrary.h"
+//#include "Math/UnrealMathUtility.h"
+
+//DECLARE_LOG_CATEGORY_EXTERN(TankLog, All, All);
+//DEFINE_LOG_CATEGORY(TankLog);
 
 // Sets default values
 ATankPawn::ATankPawn()
@@ -39,6 +41,13 @@ ATankPawn::ATankPawn()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
 
+	////Tiger
+	//TigerBodyMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Tiger body"));
+	////RootComponent = BodyMesh;
+
+	//TigerTurretMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Tiger turret"));
+	//TigerTurretMesh->SetupAttachment(TigerBodyMesh);
+
 }
 
 void ATankPawn::MoveForward(float AxisValue)
@@ -64,6 +73,36 @@ void ATankPawn::Movement(float DeltaTime)
 	yawRotation = currentRotation.Yaw + yawRotation;
 	FRotator newRotation = FRotator(0, yawRotation, 0);
 	SetActorRotation(newRotation);
+
+	// Turret rotation
+	//UE_LOG(TankLog, Warning, TEXT("TankController = %f"), TankController);
+	if (TankController)
+	{
+		FVector mousePos = TankController->GetMousePos();
+		//UE_LOG(TankLog, Warning, TEXT("MousePos() = %f"), mousePos);
+		
+		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, mousePos.ToString());
+		RotateTurretTo(mousePos);
+		// FRotator targetRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), mousePos);
+		// FRotator currRotation = TurretMesh->GetComponentRotation();
+		// targetRotation.Pitch = currRotation.Pitch;
+		// targetRotation.Roll = currRotation.Roll;
+		// TurretMesh->SetWorldRotation(FMath::Lerp(currRotation, targetRotation, TurretRotationInterpolationKey));
+	}
+}
+
+void ATankPawn::RotateTurretTo(FVector TargetPosition)
+{
+	FRotator targetRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), TargetPosition);
+	FRotator currRotation = TurretMesh->GetComponentRotation();
+	targetRotation.Pitch = currRotation.Pitch;
+	targetRotation.Roll = currRotation.Roll;
+	//GEngine->AddOnScreenDebugMessage(5, 15.0f, FColor::Red, "c: " + FString::SanitizeFloat(currRotation.Yaw- targetRotation.Yaw));
+	//GEngine->AddOnScreenDebugMessage(15, 15.0f, FColor::Red, "t: " + FString::SanitizeFloat(targetRotation.Yaw));
+	//GEngine->AddOnScreenDebugMessage(15, 15.0f, FColor::Red, targetRotation.ToString());
+	TurretMesh->SetWorldRotation(FMath::Lerp(currRotation, targetRotation, TurretRotationInterpolationKey));
+	//TurretMesh->SetWorldRotation(FMath::Lerp(currRotation, FRotator(0.f, targetRotation.Yaw, 00.f), TurretRotationInterpolationKey));
+	//TurretMesh->SetWorldRotation(targetRotation);
 }
 
 // Called when the game starts or when spawned

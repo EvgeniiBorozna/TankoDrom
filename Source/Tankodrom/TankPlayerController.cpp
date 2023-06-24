@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TankPlayerController.h"
-
+#include "DrawDebugHelpers.h"
 #include "TankPawn.h"
 #include "Engine/Engine.h"
 
@@ -17,7 +17,7 @@ void ATankPlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 	InputComponent->BindAxis("MoveForward", this, &ATankPlayerController::MoveForward);
 	InputComponent->BindAxis("RotateRight", this, &ATankPlayerController::RotateRight);
-
+	InputComponent->BindAxis("TurretRotationRight", this, &ATankPlayerController::RotateTurretRight);
 }
 
 void ATankPlayerController::Tick(float DeltaTime)
@@ -27,9 +27,13 @@ void ATankPlayerController::Tick(float DeltaTime)
 	FVector pawnPos = TankPawn->GetActorLocation();
 	MousePos.Z = pawnPos.Z;
 	FVector dir = MousePos - pawnPos;
+	MousePos = MousePos + 1500;
+	//MousePos.Y += 1500;
 	dir.Normalize();
 	MousePos = pawnPos + dir * 1000;
-	//DrawDebugLine(GetWorld(), pawnPos, MousePos, FColor::Green, false, 0.1f, 0, 5);
+	GEngine->AddOnScreenDebugMessage(5, 1, FColor::Blue, MousePos.ToString());
+	GEngine->AddOnScreenDebugMessage(15, 1, FColor::Blue, pawnPos.ToString());
+	DrawDebugLine(GetWorld(), pawnPos, MousePos, FColor::Green, false, 0.1f, 0, 2);
 }
 
 void ATankPlayerController::BeginPlay()
@@ -48,4 +52,9 @@ void ATankPlayerController::MoveForward(float AxisValue)
 void ATankPlayerController::RotateRight(float AxisValue)
 {
 	TankPawn->RotateRight(AxisValue);
+}
+
+void ATankPlayerController::RotateTurretRight(float AxisValue)
+{
+	//GEngine->AddOnScreenDebugMessage(5, 1, FColor::Blue, FString::SanitizeFloat(AxisValue));
 }

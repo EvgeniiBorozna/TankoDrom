@@ -33,15 +33,23 @@ protected:
 		UCameraComponent* Camera;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement|Speed")
-		float MoveSpeed = 200;
+		float MoveSpeed = 500;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement|Speed")
-		float RotationSpeed = 50;
+		float RotationSpeed = 10;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement|Speed")
 		float InterpolationKey = 0.1f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret|Speed")
+		float TurretRotationInterpolationKey = 0.1f;
 
 	float TargetForwardAxisValue;
 	float TargetRightAxisValue;
 	float CurrentRightAxisValue;
+
+	// Enemy Tiger
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		UStaticMeshComponent* TigerBodyMesh;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		UStaticMeshComponent* TigerTurretMesh;
 
 	UPROPERTY()
 		ATankPlayerController* TankController;
@@ -56,6 +64,8 @@ public:
 		void RotateRight(float AxisValue);
 	UFUNCTION()
 		void Movement(float DeltaTime);
+	UFUNCTION()
+		void RotateTurretTo(FVector TargetPosition);
 
 protected:
 	// Called when the game starts or when spawned
