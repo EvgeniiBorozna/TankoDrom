@@ -26,11 +26,12 @@ void ATankPlayerController::Tick(float DeltaTime)
 	DeprojectMousePositionToWorld(MousePos, mouseDirection);
 	FVector pawnPos = TankPawn->GetActorLocation();
 	MousePos.Z = pawnPos.Z;
+	
+	MousePos.Y += 960;
+	MousePos.X += 1145;
 	FVector dir = MousePos - pawnPos;
-	MousePos = MousePos + 1500;
-	//MousePos.Y += 1500;
 	dir.Normalize();
-	MousePos = pawnPos + dir * 1000;
+	//MousePos = pawnPos + dir * 1000;
 	GEngine->AddOnScreenDebugMessage(5, 1, FColor::Blue, MousePos.ToString());
 	GEngine->AddOnScreenDebugMessage(15, 1, FColor::Blue, pawnPos.ToString());
 	DrawDebugLine(GetWorld(), pawnPos, MousePos, FColor::Green, false, 0.1f, 0, 2);
