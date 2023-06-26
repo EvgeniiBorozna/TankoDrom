@@ -53,7 +53,6 @@ protected:
 	float TargetForwardAxisValue;
 	float TargetRightAxisValue;
 	float CurrentRightAxisValue;
-	int ShellsCount;
 
 	// Enemy Tiger
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")

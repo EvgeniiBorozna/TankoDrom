@@ -22,6 +22,8 @@ public:
 	virtual void SetupInputComponent() override;
 	virtual void Tick(float DeltaTime) override;
 	FVector GetMousePos() { return MousePos; };
+	float Xdif = 0;
+	float Ydif = 0;
 
 protected:
 	virtual void BeginPlay() override;

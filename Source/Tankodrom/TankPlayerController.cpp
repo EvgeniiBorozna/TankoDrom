@@ -29,8 +29,8 @@ void ATankPlayerController::Tick(float DeltaTime)
 	FVector pawnPos = TankPawn->GetActorLocation();
 	MousePos.Z = pawnPos.Z;
 	
-	MousePos.Y += 959.4;
-	MousePos.X += 1145;
+	MousePos.Y += Ydif;
+	MousePos.X += Xdif;
 	FVector dir = MousePos - pawnPos;
 	dir.Normalize();
 	FVector targetLine = pawnPos + dir * 1500;

@@ -75,6 +75,16 @@ void ATankPawn::Movement(float DeltaTime)
 	FRotator newRotation = FRotator(0, yawRotation, 0);
 	SetActorRotation(newRotation);
 
+	FRotator ArmRot = SpringArm->GetTargetRotation();
+	TankController->Xdif = (SpringArm->TargetArmLength - 10) * cos(ArmRot.Pitch * 3.14159 / 180) * cos(ArmRot.Yaw * 3.14159 / 180);
+	TankController->Ydif = (SpringArm->TargetArmLength - 10) * cos(ArmRot.Pitch * 3.14159 / 180) * sin(ArmRot.Yaw * 3.14159 / 180);
+	GEngine->AddOnScreenDebugMessage(35, 1, FColor::Blue, FString::SanitizeFloat(TankController->Xdif));
+	GEngine->AddOnScreenDebugMessage(36, 1, FColor::Blue, FString::SanitizeFloat(TankController->Ydif));
+	//GEngine->AddOnScreenDebugMessage(40, 1, FColor::Red, FString::SanitizeFloat(SpringArm->TargetArmLength));
+
+	FVector ActLoc = GetActorLocation();
+	GEngine->AddOnScreenDebugMessage(45, 1, FColor::Blue, ActLoc.ToString());
+
 	// Turret rotation
 	//UE_LOG(TankLog, Warning, TEXT("TankController = %f"), TankController);
 	if (TankController)
@@ -128,9 +138,8 @@ void ATankPawn::BeginPlay()
 	Super::BeginPlay();
 	TankController = Cast<ATankPlayerController>(GetController());
 	SetupCannon();
-	FVector startPos = FVector(1100, 1000, 50);
+	FVector startPos = FVector(1000, 1000, 50);
 	SetActorLocation(startPos);
-	ShellsCount = 10;
 }
 
 void ATankPawn::SetupCannon()
