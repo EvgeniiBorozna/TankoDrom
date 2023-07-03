@@ -1,9 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
-#include "Cannon.h"
+#include "CommonPlayer.h"
 #include "CoreMinimal.h"
+//#include "IScorable.h"
+#include "Components/BoxComponent.h"
 #include "GameFramework/Pawn.h"
 #include "TankPawn.generated.h"
 
@@ -14,7 +14,7 @@ class ATankPlayerController;
 class ACannon;
 
 UCLASS()
-class TANKODROM_API ATankPawn : public APawn
+class TANKODROM_API ATankPawn : public APawn, public IDamageTaker//, public IIScorable
 {
 	GENERATED_BODY()
 
@@ -33,6 +33,12 @@ protected:
 		USpringArmComponent* SpringArm;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		UCameraComponent* Camera;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		UArrowComponent* CannonSetupPoint;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		UHealthComponent* HealthComponent;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		UBoxComponent* HitCollider;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement|Speed")
 		float MoveSpeed = 500;
@@ -41,10 +47,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement|Speed")
 		float InterpolationKey = 0.1f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret|Speed")
-		float TurretRotationInterpolationKey = 0.1f;
+		float TurretRotationInterpolationKey = 0.05f;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-		UArrowComponent* CannonSetupPoint;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret|Cannon")
 		TSubclassOf<ACannon> CannonClass;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret|Cannon")
@@ -56,11 +60,10 @@ protected:
 	float TargetRightAxisValue;
 	float CurrentRightAxisValue;
 
-	// Enemy Tiger
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-		UStaticMeshComponent* TigerBodyMesh;
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-		UStaticMeshComponent* TigerTurretMesh;
+public:
+	int CollectedScores = 0;
+
+	//IIScorable* ScoreSender;
 
 	UPROPERTY()
 		ATankPlayerController* TankController;
@@ -81,8 +84,15 @@ public:
 		void Fire();
 	UFUNCTION()
 		void FireAlt();
+	UFUNCTION()
+		void TakeDamage(FDamageData DamageData);
+	//UFUNCTION()
+		//void SetScores(IIScorable* ScoreSender);
+	UFUNCTION()
+		void CollectScores(int Scores);
 
 		void CollectShells(int);
+
 
 protected:
 	// Called when the game starts or when spawned
@@ -93,6 +103,11 @@ public:
 
 	void SetupCannon(TSubclassOf<ACannon>);
 	void ChangeCannon();
+	UFUNCTION()
+		void Die();
+
+	UFUNCTION()
+		void DamageTaked(float DamageValue);
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

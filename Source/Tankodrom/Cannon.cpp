@@ -20,16 +20,13 @@ ACannon::ACannon()
 	ProjectileSpawnPoint->SetupAttachment(Mesh);
 	
 }
-void ACannon::Fire(ECannonType FireType)
+void ACannon::Fire()
 {
 	if (!ReadyToFire)
 	{
 		return;
 	}
 	ReadyToFire = false;
-
-	if (FireType == ECannonType::FireProjectile)
-	{
 		if (ShellsCount > 0) {
 			AProjectile* projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass,
 				ProjectileSpawnPoint->GetComponentLocation(),
@@ -45,27 +42,6 @@ void ACannon::Fire(ECannonType FireType)
 		}
 		else
 			GEngine->AddOnScreenDebugMessage(25, 1, FColor::Red, "No shells");
-	}
-	else
-	{
-		for (int i = 0; i < 3; i++) {
-			if (ShellsCount > 0) {
-				AProjectile* projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass,
-					ProjectileSpawnPoint->GetComponentLocation(),
-					ProjectileSpawnPoint->GetComponentRotation());
-				if (projectile)
-				{
-					projectile->Start();
-				}
-				GEngine->AddOnScreenDebugMessage(10, 1, FColor::Green, "Fire - trace");
-				ShellsCount--;
-				GEngine->AddOnScreenDebugMessage(25 + i, 1, FColor::Green, FString::SanitizeFloat(ShellsCount));
-				GetWorld()->GetTimerManager().SetTimer(ReloadTimerHandle, this, &ACannon::Reload, 1 / FireRate, false);
-			}
-			else
-				GEngine->AddOnScreenDebugMessage(25 + i, 1, FColor::Red, "No shells");
-		}
-	}
 
 	GetWorld()->GetTimerManager().SetTimer(ReloadTimerHandle, this, &ACannon::Reload, 1 / FireRate, false);
 }

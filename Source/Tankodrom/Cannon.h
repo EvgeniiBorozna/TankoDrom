@@ -41,7 +41,7 @@ public:
 public:
 	ACannon();
 
-	void Fire(ECannonType);
+	void Fire();
 	void AddShells(int);
 
 	bool IsReadyToFire();

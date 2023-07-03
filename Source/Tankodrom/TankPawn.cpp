@@ -1,4 +1,6 @@
 
+//#include "IScorable.h"
+
 #include "TankPawn.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -7,8 +9,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/ArrowComponent.h"
 
-//DECLARE_LOG_CATEGORY_EXTERN(TankLog, All, All);
-//DEFINE_LOG_CATEGORY(TankLog);
+DECLARE_LOG_CATEGORY_EXTERN(TankLog, All, All);
+DEFINE_LOG_CATEGORY(TankLog);
 
 // Sets default values
 ATankPawn::ATankPawn()
@@ -33,9 +35,6 @@ ATankPawn::ATankPawn()
 	CannonSetupPoint = CreateDefaultSubobject<UArrowComponent>(TEXT("Cannon setup point"));
 	CannonSetupPoint->AttachToComponent(TurretMesh, FAttachmentTransformRules::KeepRelativeTransform);
 
-	//Cannon_2SetupPoint = CreateDefaultSubobject<UArrowComponent>(TEXT("Cannon_2 setup point"));
-	//Cannon_2SetupPoint->AttachToComponent(TurretMesh, FAttachmentTransformRules::KeepRelativeTransform);
-
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring arm"));
 	SpringArm->SetupAttachment(BodyMesh);
 	SpringArm->bDoCollisionTest = false;
@@ -46,13 +45,15 @@ ATankPawn::ATankPawn()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
 
-	////Tiger
-	//TigerBodyMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Tiger body"));
-	////RootComponent = BodyMesh;
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("Health component"));
+	HealthComponent->OnDie.AddUObject(this, &ATankPawn::Die);
+	HealthComponent->OnDamaged.AddUObject(this, &ATankPawn::DamageTaked);
 
-	//TigerTurretMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Tiger turret"));
-	//TigerTurretMesh->SetupAttachment(TigerBodyMesh);
+	HitCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("Hit collider"));
+	HitCollider->SetupAttachment(BodyMesh);
 
+	//TSharedRef ScoreSender = new FScoreDelegate());
+	//ScoreDelegate.BindSP(ScoreSender, &ATankPawn::CollectScores, 1);
 }
 
 void ATankPawn::MoveForward(float AxisValue)
@@ -82,19 +83,14 @@ void ATankPawn::Movement(float DeltaTime)
 	FRotator ArmRot = SpringArm->GetTargetRotation();
 	TankController->Xdif = (SpringArm->TargetArmLength - 10) * cos(ArmRot.Pitch * 3.14159 / 180) * cos(ArmRot.Yaw * 3.14159 / 180);
 	TankController->Ydif = (SpringArm->TargetArmLength - 10) * cos(ArmRot.Pitch * 3.14159 / 180) * sin(ArmRot.Yaw * 3.14159 / 180);
-	//GEngine->AddOnScreenDebugMessage(35, 1, FColor::Blue, FString::SanitizeFloat(TankController->Xdif));
-	//GEngine->AddOnScreenDebugMessage(36, 1, FColor::Blue, FString::SanitizeFloat(TankController->Ydif));
-	//GEngine->AddOnScreenDebugMessage(40, 1, FColor::Red, FString::SanitizeFloat(SpringArm->TargetArmLength));
 
-	// Turret rotation
-	//UE_LOG(TankLog, Warning, TEXT("TankController = %f"), TankController);
 	if (TankController)
 	{
 		FVector mousePos = TankController->GetMousePos();
 		//UE_LOG(TankLog, Warning, TEXT("MousePos() = %f"), mousePos);
-		
 		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, mousePos.ToString());
-		RotateTurretTo(mousePos);
+		if (currentLocation == GetActorLocation())
+			RotateTurretTo(mousePos);
 
 	}
 }
@@ -111,19 +107,19 @@ void ATankPawn::RotateTurretTo(FVector TargetPosition)
 	TurretMesh->SetWorldRotation(FMath::Lerp(currRotation, targetRotation, TurretRotationInterpolationKey));
 }
 
-void ATankPawn::Fire()
-{
-	if (Cannon)
-	{
-		Cannon->Fire(ECannonType::FireProjectile);
-	}
-}
+//void ATankPawn::Fire()
+//{
+//	if (Cannon)
+//	{
+//		Cannon->Fire();
+//	}
+//}
 
 void ATankPawn::FireAlt()
 {
 	if (Cannon)
 	{
-		Cannon->Fire(ECannonType::FireTrace);
+		Cannon->Fire();
 	}
 }
 
@@ -138,7 +134,7 @@ void ATankPawn::BeginPlay()
 	Super::BeginPlay();
 	TankController = Cast<ATankPlayerController>(GetController());
 	SetupCannon(CannonClass);
-	FVector startPos = FVector(1000, 1000, 50);
+	FVector startPos = FVector(1000, 1000, 20);
 	SetActorLocation(startPos);
 }
 
@@ -168,7 +164,6 @@ void ATankPawn::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	ATankPawn::Movement(DeltaTime);
-
 }
 
 // Called to bind functionality to input
@@ -176,5 +171,39 @@ void ATankPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+void ATankPawn::Die()
+{
+	if (Cannon)
+		Cannon->Destroy();
+
+	Destroy();
+}
+
+//void ATankPawn::DamageTaked(float DamageValue)
+//{
+//	UE_LOG(TankLog, Warning, TEXT("Tank %s taked damage:%f Health:%f"), *GetName(), DamageValue, HealthComponent->GetHealth());
+//	/*FDamageData DamageData;
+//	DamageData.DamageValue = DamageValue;
+//	HealthComponent->TakeDamage(DamageData);*/
+//	
+//}
+
+//void ATankPawn::TakeDamage(FDamageData DamageData)
+//{
+//	HealthComponent->TakeDamage(DamageData);
+//	GEngine->AddOnScreenDebugMessage(25, 1, FColor::Red, FString::SanitizeFloat(HealthComponent->GetHealth()));
+//}
+
+//void ATankPawn::SetScores(IIScorable* ScoreSender)
+//{
+	//ScoreSender->ScoreDelegate.BindUObject(this, &ATankPawn::CollectScores);
+//}
+
+void ATankPawn::CollectScores(int Scores)
+{
+	
+	GEngine->AddOnScreenDebugMessage(15, 15.0f, FColor::Red, "Scores collected");
 }
 

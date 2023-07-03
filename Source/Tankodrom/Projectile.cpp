@@ -1,5 +1,5 @@
 #include "Projectile.h"
-
+#include "DamageTaker.h"
 #include "Components/StaticMeshComponent.h"
 #include "TimerManager.h"
 
@@ -25,16 +25,33 @@ void AProjectile::OnMeshOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Projectile %s collided with %s. "), *GetName(), *OtherActor->GetName());
-
 	AActor* owner = GetOwner();
 	AActor* ownerByOwner = owner != nullptr ? owner->GetOwner() : nullptr;
 	if (OtherActor != owner && OtherActor != ownerByOwner)
 	{
+		IDamageTaker* damageTakerActor = Cast<IDamageTaker>(OtherActor);
+		if (damageTakerActor)
+		{
+			FDamageData damageData;
+			damageData.DamageValue = Damage;
+			damageData.Instigator = owner;
+			damageData.DamageMaker = this;
+
+			damageTakerActor->TakeDamage(damageData);
+
+		}
+		else
+		{
+			//OtherActor->Destroy();
+
+		}
 
 		Destroy();
-		GEngine->AddOnScreenDebugMessage(25, 1, FColor::Red, "Projectile destroyed");
 		//UE_LOG(LogTemp, Warning, TEXT("Projectile destroyed"));
 	}
+	
+	// OtherActor->Destroy();
+	// Destroy();
 }
 
 void AProjectile::Move()
@@ -42,3 +59,4 @@ void AProjectile::Move()
 	FVector nextPosition = GetActorLocation() + GetActorForwardVector() * MoveSpeed * MoveRate;
 	SetActorLocation(nextPosition);
 }
+//GEngine->AddOnScreenDebugMessage(25, 1, FColor::Red, "Projectile destroyed");
