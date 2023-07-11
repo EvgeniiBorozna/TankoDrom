@@ -26,12 +26,12 @@ ATurret::ATurret()
 
 }
 
-//void ATurret::TakeDamage(FDamageData DamageData)
-//{
-//	UE_LOG(LogTemp, Warning, TEXT("Turret %s taked damage:%f "), *GetName(), DamageData.DamageValue);
-//	HealthComponent->TakeDamage(DamageData);
-//	GEngine->AddOnScreenDebugMessage(45, 1, FColor::Blue, FString::SanitizeFloat(HealthComponent->GetHealth()));
-//}
+void ATurret::TakeDamage(FDamageData DamageData)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Turret %s taked damage:%f "), *GetName(), DamageData.DamageValue);
+	HealthComponent->TakeDamage(DamageData);
+	GEngine->AddOnScreenDebugMessage(45, 1, FColor::Blue, FString::SanitizeFloat(HealthComponent->GetHealth()));
+}
 
 // Called when the game starts or when spawned
 void ATurret::BeginPlay()
@@ -127,11 +127,11 @@ bool ATurret::CanFire()
 	return (aimAngle) <= Accurency;
 }
 
-//void ATurret::Fire()
-//{
-//	if (Cannon)
-//		Cannon->Fire();
-//}
+void ATurret::Fire()
+{
+	if (Cannon)
+		Cannon->Fire();
+}
 
 void ATurret::Die()
 {
@@ -139,16 +139,16 @@ void ATurret::Die()
 	TurretMesh->SetRelativeRotation(FRotator(-10, -60, 20));
 	TurretMesh->SetRelativeLocation(FVector(0, 0, 150));
 	//Destroy();
-	TakeScore(10);
+	////TakeScore(10);
 }
 
-//void ATurret::DamageTaked(float DamageValue)
-//{
-//	UE_LOG(LogTemp, Warning, TEXT("Turret %s taked damage:%f Health:%f"), *GetName(), DamageValue, HealthComponent->GetHealth());
-//	
-//}
-
-void ATurret::TakeScore(int Scores)
+void ATurret::DamageTaked(float DamageValue)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Turret %s taked damage:%f Health:%f"), *GetName(), DamageValue, HealthComponent->GetHealth());
 	
 }
+
+//void ATurret::TakeScore(int Scores)
+//{
+	
+//}

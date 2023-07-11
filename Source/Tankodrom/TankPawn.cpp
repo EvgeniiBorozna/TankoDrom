@@ -5,12 +5,13 @@
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Engine/TargetPoint.h"
 #include "TankPlayerController.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/ArrowComponent.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(TankLog, All, All);
-DEFINE_LOG_CATEGORY(TankLog);
+//DECLARE_LOG_CATEGORY_EXTERN(TankLog, All, All);
+//DEFINE_LOG_CATEGORY(TankLog);
 
 // Sets default values
 ATankPawn::ATankPawn()
@@ -81,8 +82,10 @@ void ATankPawn::Movement(float DeltaTime)
 	SetActorRotation(newRotation);
 
 	FRotator ArmRot = SpringArm->GetTargetRotation();
-	TankController->Xdif = (SpringArm->TargetArmLength - 10) * cos(ArmRot.Pitch * 3.14159 / 180) * cos(ArmRot.Yaw * 3.14159 / 180);
-	TankController->Ydif = (SpringArm->TargetArmLength - 10) * cos(ArmRot.Pitch * 3.14159 / 180) * sin(ArmRot.Yaw * 3.14159 / 180);
+	if(humanPlayer) {
+		TankController->Xdif = (SpringArm->TargetArmLength - 10) * cos(ArmRot.Pitch * 3.14159 / 180) * cos(ArmRot.Yaw * 3.14159 / 180);
+		TankController->Ydif = (SpringArm->TargetArmLength - 10) * cos(ArmRot.Pitch * 3.14159 / 180) * sin(ArmRot.Yaw * 3.14159 / 180);
+	}
 
 	if (TankController)
 	{
@@ -107,13 +110,24 @@ void ATankPawn::RotateTurretTo(FVector TargetPosition)
 	TurretMesh->SetWorldRotation(FMath::Lerp(currRotation, targetRotation, TurretRotationInterpolationKey));
 }
 
-//void ATankPawn::Fire()
-//{
-//	if (Cannon)
-//	{
-//		Cannon->Fire();
-//	}
-//}
+FVector ATankPawn::GetEyesPosition()
+{
+	return CannonSetupPoint->GetComponentLocation();
+}
+
+void ATankPawn::SetPatrollingPoints(TArray<FVector> NewPatrollingPoints)
+{
+	FVector scale = GetActorScale3D();
+	//PatrollingPoints = NewPatrollingPoints;
+}
+
+void ATankPawn::Fire()
+{
+	if (Cannon)
+	{
+		Cannon->Fire();
+	}
+}
 
 void ATankPawn::FireAlt()
 {
@@ -133,9 +147,11 @@ void ATankPawn::BeginPlay()
 {
 	Super::BeginPlay();
 	TankController = Cast<ATankPlayerController>(GetController());
+	TankAIController = Cast<ATankAIController>(GetController());
 	SetupCannon(CannonClass);
-	FVector startPos = FVector(1000, 1000, 20);
+	
 	SetActorLocation(startPos);
+	//PatrollingPoints.Add()
 }
 
 void ATankPawn::SetupCannon(TSubclassOf<ACannon> NewCannonClass)
@@ -181,20 +197,36 @@ void ATankPawn::Die()
 	Destroy();
 }
 
-//void ATankPawn::DamageTaked(float DamageValue)
+void ATankPawn::DamageTaked(float DamageValue)
+{
+	//UE_LOG(TankLog, Warning, TEXT("Tank %s taked damage:%f Health:%f"), *GetName(), DamageValue, HealthComponent->GetHealth());
+	/*FDamageData DamageData;
+	DamageData.DamageValue = DamageValue;
+	HealthComponent->TakeDamage(DamageData);*/
+	
+}
+
+void ATankPawn::TakeDamage(FDamageData DamageData)
+{
+	HealthComponent->TakeDamage(DamageData);
+	GEngine->AddOnScreenDebugMessage(25, 1, FColor::Red, FString::SanitizeFloat(HealthComponent->GetHealth()));
+}
+
+//TArray<FVector> ATankPawn::GetPatrollingPoints()
 //{
-//	UE_LOG(TankLog, Warning, TEXT("Tank %s taked damage:%f Health:%f"), *GetName(), DamageValue, HealthComponent->GetHealth());
-//	/*FDamageData DamageData;
-//	DamageData.DamageValue = DamageValue;
-//	HealthComponent->TakeDamage(DamageData);*/
-//	
+//	TArray<FVector> points;
+//	for (FVector point : PatrollingPoints)
+//	{
+//		points.Add(point.GetActorLocation());
+//	}
+//
+//	return points;
 //}
 
-//void ATankPawn::TakeDamage(FDamageData DamageData)
-//{
-//	HealthComponent->TakeDamage(DamageData);
-//	GEngine->AddOnScreenDebugMessage(25, 1, FColor::Red, FString::SanitizeFloat(HealthComponent->GetHealth()));
-//}
+FVector ATankPawn::GetTurretForwardVector()
+{
+	return TurretMesh->GetForwardVector();
+}
 
 //void ATankPawn::SetScores(IIScorable* ScoreSender)
 //{

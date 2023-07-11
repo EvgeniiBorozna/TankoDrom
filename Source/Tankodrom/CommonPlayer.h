@@ -4,21 +4,21 @@
 #include "Cannon.h"
 #include "DamageTaker.h"
 #include "HealthComponent.h"
+#include "Engine/TargetPoint.h"
 
-class TANKODROM_API CommonPlayer
+//UCLASS()
+class TANKODROM_API CommonPlayer : public IDamageTaker
 {
 public:
-	CommonPlayer();
-	~CommonPlayer();
 
-	UFUNCTION()
-		void Fire();
-	UFUNCTION()
-		void TakeDamage(FDamageData DamageData);
-	UFUNCTION()
-		void DamageTaked(float DamageValue);
+	//UFUNCTION()
+	//	void Fire();
+	//UFUNCTION()
+	//	void TakeDamage(FDamageData DamageData);
+	//UFUNCTION()
+	//	void DamageTaked(float DamageValue);
 
-protected:
+//protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		UHealthComponent* HealthComponent;
 	UPROPERTY()

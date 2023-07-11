@@ -3,7 +3,9 @@
 #include "CommonPlayer.h"
 #include "CoreMinimal.h"
 //#include "IScorable.h"
+#include "TankAIController.h"
 #include "Components/BoxComponent.h"
+#include "Engine/TargetPoint.h"
 #include "GameFramework/Pawn.h"
 #include "TankPawn.generated.h"
 
@@ -11,14 +13,20 @@ class UStaticMeshComponent;
 class UCameraComponent;
 class USpringArmComponent;
 class ATankPlayerController;
+class ATankAIController;
 class ACannon;
 
 UCLASS()
-class TANKODROM_API ATankPawn : public APawn, public IDamageTaker//, public IIScorable
+class TANKODROM_API ATankPawn : public APawn, public IDamageTaker//, public IIScorable, public CommonPlayer
 {
 	GENERATED_BODY()
 
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Pawn")
+		FVector startPos = FVector(1000, 1000, 20);
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Pawn")
+		bool humanPlayer = true;
+
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		UStaticMeshComponent* BodyMesh;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
@@ -56,6 +64,13 @@ protected:
 	UPROPERTY()
 		ACannon* Cannon;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Move params|Patrol points", Meta = (MakeEditWidget = true))
+		TArray<FVector> PatrollingPoints;
+	//int32 _currentPatrolPointIndex = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Move params|Accurency")
+		float MovementAccurency = 50;
+
 	float TargetForwardAxisValue;
 	float TargetRightAxisValue;
 	float CurrentRightAxisValue;
@@ -67,6 +82,8 @@ public:
 
 	UPROPERTY()
 		ATankPlayerController* TankController;
+	UPROPERTY()
+		ATankAIController* TankAIController;
 
 public:
 	// Sets default values for this pawn's properties
@@ -80,12 +97,22 @@ public:
 		void Movement(float DeltaTime);
 	UFUNCTION()
 		void RotateTurretTo(FVector TargetPosition);
+	FVector GetEyesPosition();
+	void SetPatrollingPoints(TArray<FVector> NewPatrollingPoints);
 	UFUNCTION()
 		void Fire();
 	UFUNCTION()
 		void FireAlt();
 	UFUNCTION()
 		void TakeDamage(FDamageData DamageData);
+
+	UFUNCTION()
+		TArray<FVector> GetPatrollingPoints() { return PatrollingPoints; };
+	UFUNCTION()
+		float GetMovementAccurency() { return MovementAccurency; };
+	UFUNCTION()
+		FVector GetTurretForwardVector();
+
 	//UFUNCTION()
 		//void SetScores(IIScorable* ScoreSender);
 	UFUNCTION()

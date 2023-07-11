@@ -4,12 +4,12 @@
 #include "CoreMinimal.h"
 #include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
-#include "IScorable.h"
+//#include "IScorable.h"
 #include "GameFramework/Actor.h"
 #include "Turret.generated.h"
 
 UCLASS()
-class TANKODROM_API ATurret : public AActor, public IDamageTaker, public IIScorable
+class TANKODROM_API ATurret : public AActor, public IDamageTaker//, public CommonPlayer
 {
 	GENERATED_BODY()
 
@@ -74,6 +74,6 @@ protected:
 	UFUNCTION()
 		void DamageTaked(float DamageValue);
 
-	UFUNCTION()
-		void TakeScore(int Scores) override;
+	//UFUNCTION()
+		//void TakeScore(int Scores) override;
 };

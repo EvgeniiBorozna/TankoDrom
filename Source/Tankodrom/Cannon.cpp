@@ -19,6 +19,11 @@ ACannon::ACannon()
 	ProjectileSpawnPoint = CreateDefaultSubobject<UArrowComponent>(TEXT("Spawn point"));
 	ProjectileSpawnPoint->SetupAttachment(Mesh);
 	
+	ShootEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Shoot effect"));
+	ShootEffect->SetupAttachment(ProjectileSpawnPoint);
+
+	AudioEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio effect"));
+	//AudioEffect->SetupAttachment(ProjectileSpawnPoint);
 }
 void ACannon::Fire()
 {
@@ -27,6 +32,8 @@ void ACannon::Fire()
 		return;
 	}
 	ReadyToFire = false;
+	ShootEffect->ActivateSystem();
+	AudioEffect->Play();
 		if (ShellsCount > 0) {
 			AProjectile* projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass,
 				ProjectileSpawnPoint->GetComponentLocation(),
