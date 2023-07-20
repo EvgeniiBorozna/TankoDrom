@@ -88,14 +88,17 @@ bool ATankAIController::IsPlayerInRange()
 
 bool ATankAIController::CanFire()
 {
-    if (!IsPlayerSeen())
+    if (!IsPlayerSeen()) {
+        GEngine->AddOnScreenDebugMessage(5, 15.0f, FColor::Red, "Cant see");
         return false;
-
+    } else GEngine->AddOnScreenDebugMessage(5, 15.0f, FColor::Green, "Can see");
+    
     FVector targetingDir = TankPawn->GetTurretForwardVector();
     FVector dirToPlayer = PlayerPawn->GetActorLocation() - TankPawn->GetActorLocation();
     dirToPlayer.Normalize();
     float aimAngle = FMath::RadiansToDegrees(acosf(FVector::DotProduct(targetingDir, dirToPlayer)));
-    GEngine->AddOnScreenDebugMessage(15, 15.0f, FColor::Red, FString::SanitizeFloat(aimAngle-Accurency));
+    if (aimAngle <= Accurency) GEngine->AddOnScreenDebugMessage(15, 15.0f, FColor::Green, "Can fire");
+    else GEngine->AddOnScreenDebugMessage(15, 15.0f, FColor::Red, "Cant fire");
     return aimAngle <= Accurency;
 }
 
@@ -109,7 +112,6 @@ bool ATankAIController::IsPlayerSeen()
 
     FVector playerPos = PlayerPawn->GetActorLocation();
     FVector eyesPos = TankPawn->GetEyesPosition();
-    //eyesPos.Z = playerPos.Z;
 
     FHitResult hitResult;
     FCollisionQueryParams traceParams = FCollisionQueryParams(FName(TEXT("FireTrace")), true, this);
@@ -119,17 +121,13 @@ bool ATankAIController::IsPlayerSeen()
 
     //GEngine->AddOnScreenDebugMessage(15, 15.0f, FColor::Red, playerPos.ToString());
     //GEngine->AddOnScreenDebugMessage(18, 15.0f, FColor::Red, eyesPos.ToString());
-
-    //if 
-    (GetWorld()->LineTraceSingleByChannel(hitResult, eyesPos, playerPos, ECollisionChannel::ECC_Visibility, traceParams));
+    
+    if (!GetWorld()->LineTraceSingleByChannel(hitResult, eyesPos, playerPos, ECollisionChannel::ECC_Visibility, traceParams))
     {
-        GEngine->AddOnScreenDebugMessage(18, 15.0f, FColor::Red, hitResult.ToString());
-        if (hitResult.GetActor())
-        {
-            DrawDebugLine(GetWorld(), eyesPos, hitResult.Location, FColor::Cyan, false, 0.5f, 0, 10);
-            return hitResult.GetActor() == PlayerPawn;
-        }
+            //DrawDebugLine(GetWorld(), eyesPos, playerPos, FColor::White, false, 0.5f, 0, 10);
+            return true;
     }
+
     return false;
 }
 

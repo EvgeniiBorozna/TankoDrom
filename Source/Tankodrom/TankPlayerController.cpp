@@ -37,7 +37,7 @@ void ATankPlayerController::Tick(float DeltaTime)
 	FVector targetLine = pawnPos + dir * 1500;
 	//GEngine->AddOnScreenDebugMessage(5, 1, FColor::Blue, MousePos.ToString());
 	//GEngine->AddOnScreenDebugMessage(15, 1, FColor::Blue, pawnPos.ToString());
-	DrawDebugLine(GetWorld(), pawnPos, targetLine, FColor::Green, false, 0.1f, 0, 3);
+	//DrawDebugLine(GetWorld(), pawnPos, targetLine, FColor::Green, false, 0.1f, 0, 3);
 }
 
 void ATankPlayerController::BeginPlay()

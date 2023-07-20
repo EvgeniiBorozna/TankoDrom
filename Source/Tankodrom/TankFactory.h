@@ -26,10 +26,13 @@ protected:
 		TSubclassOf<ATankPawn> SpawnTankClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Spawn tanks params")
-		float SpawnTankRate = 1;
+		float SpawnTankRate = 10;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn tanks params")
 		TArray<ATargetPoint*> TankWayPoints;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Spawn tanks params")
+		int SpawnTankCount = 3;
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn tanks params")
 		//AMapLoader* LinkedMapLoader;

@@ -59,7 +59,9 @@ ATankPawn::ATankPawn()
 
 void ATankPawn::MoveForward(float AxisValue)
 {
-	TargetForwardAxisValue = AxisValue;
+	if (this) {
+		TargetForwardAxisValue = AxisValue;
+	}
 }
 
 void ATankPawn::RotateRight(float AxisValue)
@@ -107,6 +109,7 @@ void ATankPawn::RotateTurretTo(FVector TargetPosition)
 	//GEngine->AddOnScreenDebugMessage(5, 15.0f, FColor::Red, "c: " + FString::SanitizeFloat(currRotation.Yaw- targetRotation.Yaw));
 	//GEngine->AddOnScreenDebugMessage(15, 15.0f, FColor::Red, "t: " + FString::SanitizeFloat(targetRotation.Yaw));
 	//GEngine->AddOnScreenDebugMessage(15, 15.0f, FColor::Red, targetRotation.ToString());
+	if (!Destroyed)
 	TurretMesh->SetWorldRotation(FMath::Lerp(currRotation, targetRotation, TurretRotationInterpolationKey));
 }
 
@@ -115,14 +118,15 @@ FVector ATankPawn::GetEyesPosition()
 	return CannonSetupPoint->GetComponentLocation();
 }
 
-void ATankPawn::SetPatrollingPoints(TArray<FVector> NewPatrollingPoints)
+void ATankPawn::SetPatrollingPoints(TArray<ATargetPoint*> NewPatrollingPoints)
 {
-	FVector scale = GetActorScale3D();
-	//PatrollingPoints = NewPatrollingPoints;
+	//FVector scale = GetActorScale3D();
+	PatrollingPoints = NewPatrollingPoints;
 }
 
 void ATankPawn::Fire()
 {
+	if (!Destroyed)
 	if (Cannon)
 	{
 		Cannon->Fire();
@@ -131,6 +135,7 @@ void ATankPawn::Fire()
 
 void ATankPawn::FireAlt()
 {
+	if(!Destroyed)
 	if (Cannon)
 	{
 		Cannon->Fire();
@@ -149,8 +154,15 @@ void ATankPawn::BeginPlay()
 	TankController = Cast<ATankPlayerController>(GetController());
 	TankAIController = Cast<ATankAIController>(GetController());
 	SetupCannon(CannonClass);
-	
-	SetActorLocation(startPos);
+
+	if (!GetController())
+	{
+		SpawnDefaultController();
+	}
+	if (humanPlayer) {
+		SetActorLocation(startPos);
+	}
+	//
 	//PatrollingPoints.Add()
 }
 
@@ -178,8 +190,8 @@ void ATankPawn::ChangeCannon()
 void ATankPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	ATankPawn::Movement(DeltaTime);
+	if(!Destroyed)
+		ATankPawn::Movement(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -191,10 +203,15 @@ void ATankPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void ATankPawn::Die()
 {
-	if (Cannon)
-		Cannon->Destroy();
-
-	Destroy();
+	//if (Cannon)
+		//Cannon->AddActorLocalRotation(FRotator(-10, -60, 20));
+	if (!Destroyed) {
+		BodyMesh->AddLocalRotation(FRotator(-10, -60, 20));
+		MoveSpeed = 0;
+		RotationSpeed = 0;
+		Destroyed = true;
+		//Destroy();
+	}
 }
 
 void ATankPawn::DamageTaked(float DamageValue)
@@ -212,16 +229,16 @@ void ATankPawn::TakeDamage(FDamageData DamageData)
 	GEngine->AddOnScreenDebugMessage(25, 1, FColor::Red, FString::SanitizeFloat(HealthComponent->GetHealth()));
 }
 
-//TArray<FVector> ATankPawn::GetPatrollingPoints()
-//{
-//	TArray<FVector> points;
-//	for (FVector point : PatrollingPoints)
-//	{
-//		points.Add(point.GetActorLocation());
-//	}
-//
-//	return points;
-//}
+TArray<FVector> ATankPawn::GetPatrollingPoints()
+{
+	TArray<FVector> points;
+	for (ATargetPoint* point : PatrollingPoints)
+	{
+		points.Add(point->GetActorLocation());
+	}
+
+	return points;
+}
 
 FVector ATankPawn::GetTurretForwardVector()
 {

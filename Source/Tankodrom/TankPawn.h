@@ -23,7 +23,7 @@ class TANKODROM_API ATankPawn : public APawn, public IDamageTaker//, public IISc
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Pawn")
-		FVector startPos = FVector(1000, 1000, 20);
+		FVector startPos;// = FVector(1000, 1000, 20);
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Pawn")
 		bool humanPlayer = true;
 
@@ -65,7 +65,7 @@ protected:
 		ACannon* Cannon;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Move params|Patrol points", Meta = (MakeEditWidget = true))
-		TArray<FVector> PatrollingPoints;
+		TArray<ATargetPoint*> PatrollingPoints;
 	//int32 _currentPatrolPointIndex = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Move params|Accurency")
@@ -74,6 +74,7 @@ protected:
 	float TargetForwardAxisValue;
 	float TargetRightAxisValue;
 	float CurrentRightAxisValue;
+	bool Destroyed = false;
 
 public:
 	int CollectedScores = 0;
@@ -98,7 +99,9 @@ public:
 	UFUNCTION()
 		void RotateTurretTo(FVector TargetPosition);
 	FVector GetEyesPosition();
-	void SetPatrollingPoints(TArray<FVector> NewPatrollingPoints);
+
+	TArray<FVector> GetPatrollingPoints();
+	void SetPatrollingPoints(TArray<ATargetPoint*> NewPatrollingPoints);
 	UFUNCTION()
 		void Fire();
 	UFUNCTION()
@@ -106,8 +109,8 @@ public:
 	UFUNCTION()
 		void TakeDamage(FDamageData DamageData);
 
-	UFUNCTION()
-		TArray<FVector> GetPatrollingPoints() { return PatrollingPoints; };
+	//UFUNCTION()
+		//TArray<ATargetPoint*> GetPatrollingPoints();// { return PatrollingPoints; };
 	UFUNCTION()
 		float GetMovementAccurency() { return MovementAccurency; };
 	UFUNCTION()
